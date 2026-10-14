@@ -10,6 +10,28 @@ macOS "System Data" can grow significantly over time, especially on development 
 
 The goal is not maximum deletion. The goal is useful cleanup with a clear safety boundary.
 
+## Install with Homebrew (recommended)
+
+Install `mac-clean` on macOS with a **single command**:
+
+```bash
+brew install yaohuangguan/tap/mac-clean
+```
+
+Homebrew automatically adds the project's maintained tap. The following commands then work from any terminal:
+
+```bash
+mac-clean --help      # options and usage
+mac-clean --version   # installed version
+mac-clean --dry-run   # safe preview: no files are deleted
+mac-clean             # interactive cleanup
+```
+
+Alternatively, once the tap is registered with `brew tap yaohuangguan/tap`, use `brew install mac-clean`.
+The unqualified `brew install mac-clean` command cannot work on a brand-new Homebrew installation until the formula is available in a previously added tap or in the official `homebrew/core` repository.
+
+The official tap is [yaohuangguan/homebrew-tap](https://github.com/yaohuangguan/homebrew-tap); it installs a versioned, SHA-256-verified GitHub release rather than downloading a moving script.
+
 ## Quick run
 
 If you have already reviewed the source:
