@@ -16,9 +16,40 @@
 set -u
 set -o pipefail
 
+MAC_CLEAN_VERSION="0.1.0"
+DRY_RUN=0
+
+usage() {
+  cat <<'HELP'
+Usage: mac-clean [--dry-run] [--help] [--version]
+
+Safely inspect macOS cache and build-artifact cleanup candidates.
+Each deletion normally asks for confirmation (default: Yes).
+
+Options:
+  --dry-run   Scan and report without deleting anything (works without a TTY)
+  -h, --help  Show this help text
+  -V, --version  Show the installed version
+
+Run 'mac-clean --dry-run' to inspect candidates before your first cleanup.
+HELP
+}
+
+case "${1:-}" in
+  "") ;;
+  --dry-run) DRY_RUN=1 ;;
+  -h|--help) usage; exit 0 ;;
+  -V|--version) printf 'mac-clean %s\n' "$MAC_CLEAN_VERSION"; exit 0 ;;
+  *) printf 'Unknown argument: %s\n' "$1" >&2; usage >&2; exit 2 ;;
+esac
+if (( $# > 1 )); then
+  printf 'Only one option may be passed at a time.\n' >&2
+  exit 2
+fi
+
 TTY="/dev/tty"
 
-if [[ ! -r "$TTY" ]]; then
+if (( DRY_RUN == 0 )) && [[ ! -r "$TTY" ]]; then
   echo "Error: no interactive terminal available. Run this from macOS Terminal."
   exit 1
 fi
@@ -45,6 +76,10 @@ hr() {
 
 ask_yes() {
   local prompt="$1"
+  if (( DRY_RUN == 1 )); then
+    printf '  [dry-run] Would clean: %s (skipped)\n' "$prompt"
+    return 1
+  fi
   local answer=""
   printf "%b%s%b [Y/n]: " "$BOLD" "$prompt" "$RESET" > "$TTY"
   IFS= read -r answer < "$TTY" || answer=""
@@ -158,6 +193,7 @@ START_EPOCH="$(date +%s)"
 clear 2>/dev/null || true
 say "${BOLD}${CYAN}macOS Safe Interactive Cleaner${RESET}"
 say "Default is ${BOLD}YES${RESET}: press Enter to clean, type ${BOLD}n${RESET} to skip."
+if (( DRY_RUN == 1 )); then say "${YELLOW}DRY RUN: no files or caches will be deleted.${RESET}"; fi
 say ""
 say "${GREEN}Safe-clean policy:${RESET} only disposable caches/logs are removed."
 say "${YELLOW}Not touched:${RESET} source code, Git repos, Xcode Archives, DeviceSupport,"
